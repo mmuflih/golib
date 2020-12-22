@@ -1,4 +1,4 @@
-module github.com/mmuflih/httplib
+module github.com/mmuflih/golib
 
 go 1.15
 
