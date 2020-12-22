@@ -18,12 +18,12 @@ import (
  * muflic.24@gmail.com
  **/
 
-type SuccessResponse struct {
+type SuccessData struct {
 	Data interface{} `json:"data"`
 	Code int         `json:"code"`
 }
 
-type ErrorResponse struct {
+type ErrorData struct {
 	DeveloperMessage string `json:"developer_message"`
 	ErrorCode        int    `json:"error_code"`
 	MoreInfo         string `json:"more_info"`
@@ -31,7 +31,7 @@ type ErrorResponse struct {
 	UserMessage      string `json:"user_message"`
 }
 
-type PaginateResponse struct {
+type PaginateData struct {
 	Data       interface{} `json:"data"`
 	Additional interface{} `json:"additional,omitempty"`
 	Paginate   struct {
@@ -42,8 +42,8 @@ type PaginateResponse struct {
 	Code int `json:"code"`
 }
 
-func NewPaginateResponse(data interface{}, count, page, size int) PaginateResponse {
-	dp := PaginateResponse{
+func NewPaginate(data interface{}, count, page, size int) PaginateData {
+	dp := PaginateData{
 		Data: data,
 		Paginate: struct {
 			Count int `json:"total"`
@@ -58,13 +58,13 @@ func NewPaginateResponse(data interface{}, count, page, size int) PaginateRespon
 	return dp
 }
 
-func ResponseException(w http.ResponseWriter, err error, code int) {
+func Exception(w http.ResponseWriter, err error, code int) {
 	/** sentry */
 	go sendSentry(err)
 
 	pc, fn, line, _ := runtime.Caller(1)
 	log.Printf("[error] %s:%d %v on %s", fn, line, err, pc)
-	exception := ErrorResponse{
+	exception := ErrorData{
 		err.Error() + " on " + fn + ":" + strconv.Itoa(line),
 		code,
 		"Contact developer or administrator",
@@ -80,8 +80,8 @@ func ResponseException(w http.ResponseWriter, err error, code int) {
 	return
 }
 
-func ResponseData(w http.ResponseWriter, data interface{}) {
-	exception := SuccessResponse{
+func Success(w http.ResponseWriter, data interface{}) {
+	exception := SuccessData{
 		data,
 		http.StatusOK,
 	}
@@ -94,7 +94,7 @@ func ResponseData(w http.ResponseWriter, data interface{}) {
 	return
 }
 
-func ResponsePaginate(w http.ResponseWriter, data interface{}) {
+func Paginate(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
