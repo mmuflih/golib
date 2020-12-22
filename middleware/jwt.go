@@ -10,7 +10,7 @@ import (
 	jwtMid "github.com/auth0/go-jwt-middleware"
 	jwt "github.com/dgrijalva/jwt-go"
 	datalog "github.com/mmuflih/go-text-log"
-	response "github.com/mmuflih/golib"
+	"github.com/mmuflih/golib/response"
 )
 
 type httpFunc func(http.ResponseWriter, *http.Request)
