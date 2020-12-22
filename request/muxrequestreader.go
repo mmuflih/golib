@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type muxRequestReader struct{}
+type muxReader struct{}
 
-type RequestReader interface {
+type Reader interface {
 	GetRouteParam(r *http.Request, name string) string
 	GetRouteParamInt(r *http.Request, name string) int
 	GetJsonData(r *http.Request, data interface{}) (err error)
@@ -19,15 +19,15 @@ type RequestReader interface {
 	GetQueryInt(r *http.Request, query string) int
 }
 
-func NewMuxRequestReader() RequestReader {
-	return &muxRequestReader{}
+func NewMuxReader() Reader {
+	return &muxReader{}
 }
 
-func (rr *muxRequestReader) GetRouteParam(r *http.Request, name string) string {
+func (rr *muxReade) GetRouteParam(r *http.Request, name string) string {
 	return mux.Vars(r)[name]
 }
 
-func (rr *muxRequestReader) GetRouteParamInt(r *http.Request, name string) int {
+func (rr *muxReader) GetRouteParamInt(r *http.Request, name string) int {
 	i, err := strconv.Atoi(mux.Vars(r)[name])
 	if err != nil {
 		fmt.Println(err)
@@ -36,17 +36,17 @@ func (rr *muxRequestReader) GetRouteParamInt(r *http.Request, name string) int {
 	return i
 }
 
-func (rr *muxRequestReader) GetJsonData(r *http.Request, data interface{}) (err error) {
+func (rr *muxReader) GetJsonData(r *http.Request, data interface{}) (err error) {
 	err = json.NewDecoder(r.Body).Decode(data)
 	return
 }
 
-func (rr *muxRequestReader) GetQuery(r *http.Request, key string) string {
+func (rr *muxReader) GetQuery(r *http.Request, key string) string {
 	qs := r.URL.Query()
 	return qs.Get(key)
 }
 
-func (rr *muxRequestReader) GetQueryInt(r *http.Request, key string) int {
+func (rr *muxReader) GetQueryInt(r *http.Request, key string) int {
 	qs := r.URL.Query()
 	qi, err := strconv.Atoi(qs.Get(key))
 	if err != nil {
