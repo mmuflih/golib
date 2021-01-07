@@ -23,7 +23,7 @@ func NewMuxReader() Reader {
 	return &muxReader{}
 }
 
-func (rr *muxReade) GetRouteParam(r *http.Request, name string) string {
+func (rr *muxReader) GetRouteParam(r *http.Request, name string) string {
 	return mux.Vars(r)[name]
 }
 
