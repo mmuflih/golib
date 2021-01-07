@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"reflect"
 	"runtime"
 	"strconv"
 	"time"
@@ -94,6 +95,19 @@ func Success(w http.ResponseWriter, data interface{}) {
 	return
 }
 
+func Json(w http.ResponseWriter, resp interface{}, err error) {
+	if err != nil {
+		Exception(w, err, 422)
+		return
+	}
+	r := parseStruct(resp)
+	if r == "*Paginator" {
+		Paginate(w, resp)
+		return
+	}
+	Success(w, resp)
+}
+
 func Paginate(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -101,12 +115,16 @@ func Paginate(w http.ResponseWriter, data interface{}) {
 	return
 }
 
-func Response() {
-
-}
-
 /** local func */
 func sendSentry(err error) {
 	defer sentry.Flush(time.Second * 2)
 	sentry.CaptureException(err)
+}
+
+func parseStruct(myvar interface{}) string {
+	if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	} else {
+		return t.Name()
+	}
 }
