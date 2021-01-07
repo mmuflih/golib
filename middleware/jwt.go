@@ -97,7 +97,7 @@ func checkJWT(w http.ResponseWriter, r *http.Request, role string) error {
 	token, err := jwtMiddleware.Options.Extractor(r)
 	if err != nil {
 		eExtractor := errors.New("400")
-		response.ResponseException(w, eExtractor, 400)
+		response.Exception(w, eExtractor, 400)
 		return eExtractor
 	}
 
@@ -108,14 +108,14 @@ func checkJWT(w http.ResponseWriter, r *http.Request, role string) error {
 		}
 
 		eReqiredToken := errors.New("Required authorization token not found")
-		response.ResponseException(w, eReqiredToken, 401)
+		response.Exception(w, eReqiredToken, 401)
 		return eReqiredToken
 	}
 
 	parsedToken, err := jwt.Parse(token, jwtMiddleware.Options.ValidationKeyGetter)
 	if err != nil {
 		ePassingToken := errors.New("Error parsing token: " + err.Error())
-		response.ResponseException(w, ePassingToken, 401)
+		response.Exception(w, ePassingToken, 401)
 		return ePassingToken
 	}
 
@@ -124,13 +124,13 @@ func checkJWT(w http.ResponseWriter, r *http.Request, role string) error {
 			jwtMiddleware.Options.SigningMethod.Alg(),
 			parsedToken.Header["alg"])
 		eTokenSpecified := errors.New(errorMsg)
-		response.ResponseException(w, eTokenSpecified, 401)
+		response.Exception(w, eTokenSpecified, 401)
 		return eTokenSpecified
 	}
 
 	if !parsedToken.Valid {
 		eInvalidToken := errors.New("Token is invalid")
-		response.ResponseException(w, eInvalidToken, 401)
+		response.Exception(w, eInvalidToken, 401)
 		return eInvalidToken
 	}
 
@@ -155,6 +155,6 @@ func checkJWT(w http.ResponseWriter, r *http.Request, role string) error {
 	}
 	e := errors.New("Access is not permitted")
 	writeLog.Write(e, "my-role", myRole, "role", role, "token-role", tokenRole, "token-uid", userID, "token", token)
-	response.ResponseException(w, e, 401)
+	response.Exception(w, e, 401)
 	return e
 }
