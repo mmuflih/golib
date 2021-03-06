@@ -105,6 +105,10 @@ func Json(w http.ResponseWriter, resp interface{}, err error) {
 		Paginate(w, resp)
 		return
 	}
+	if r == "*PaginateData" {
+		Paginate(w, resp)
+		return
+	}
 	Success(w, resp)
 }
 
