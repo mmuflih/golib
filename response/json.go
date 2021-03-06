@@ -43,7 +43,7 @@ type PaginateData struct {
 	Code int `json:"code"`
 }
 
-func NewPaginate(data interface{}, count, page, size int) PaginateData {
+func NewPaginate(data interface{}, count, page, size int) *PaginateData {
 	dp := PaginateData{
 		Data: data,
 		Paginate: struct {
@@ -56,7 +56,7 @@ func NewPaginate(data interface{}, count, page, size int) PaginateData {
 		Code: 0,
 	}
 	dp.Code = http.StatusOK
-	return dp
+	return &dp
 }
 
 func Exception(w http.ResponseWriter, err error, code int) {
