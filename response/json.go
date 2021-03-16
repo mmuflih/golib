@@ -3,6 +3,7 @@ package response
 import (
 	"encoding/json"
 	"log"
+	"math"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -36,9 +37,10 @@ type PaginateData struct {
 	Data       interface{} `json:"data"`
 	Additional interface{} `json:"additional,omitempty"`
 	Paginate   struct {
-		Count int `json:"total"`
-		Page  int `json:"page"`
-		Size  int `json:"size"`
+		Count     int `json:"total"`
+		Page      int `json:"page"`
+		Size      int `json:"size"`
+		PageCount int `json:"page_count"`
 	} `json:"paginate"`
 	Code int `json:"code"`
 }
@@ -47,11 +49,12 @@ func NewPaginate(data interface{}, count, page, size int) *PaginateData {
 	dp := PaginateData{
 		Data: data,
 		Paginate: struct {
-			Count int `json:"total"`
-			Page  int `json:"page"`
-			Size  int `json:"size"`
+			Count     int `json:"total"`
+			Page      int `json:"page"`
+			Size      int `json:"size"`
+			PageCount int `json:"page_count"`
 		}{
-			count, page, size,
+			count, page, size, int(math.Ceil(float64(count) / float64(size))),
 		},
 		Code: 0,
 	}
