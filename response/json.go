@@ -81,7 +81,6 @@ func Exception(w http.ResponseWriter, err error, code int) {
 	err = json.NewEncoder(w).Encode(
 		exception,
 	)
-	return
 }
 
 func Success(w http.ResponseWriter, data interface{}) {
@@ -95,7 +94,6 @@ func Success(w http.ResponseWriter, data interface{}) {
 	json.NewEncoder(w).Encode(
 		exception,
 	)
-	return
 }
 
 func Json(w http.ResponseWriter, resp interface{}, err error) {
@@ -123,7 +121,6 @@ func Paginate(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
-	return
 }
 
 /** local func */

@@ -47,14 +47,24 @@ func ExtractClaim(r *http.Request, key string) (interface{}, error) {
 		return "", err
 	}
 
+	if tokenStr == "" {
+		return nil, errors.New("Request Unauthorized")
+	}
+
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		// check token signing method etc
 		return signingKey, nil
 	})
+	if token == nil {
+		return nil, errors.New("Request Unauthorized #2")
+	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		return claims[key], nil
+		if claims[key] != nil {
+			return claims[key], nil
+		}
+		return nil, errors.New("Claim data not found")
 	}
 
 	if !ok {
