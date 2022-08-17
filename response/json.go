@@ -114,6 +114,10 @@ func Json(w http.ResponseWriter, resp interface{}, err error) {
 		Paginate(w, resp)
 		return
 	}
+	if r == "PaginatorSvc" {
+		PaginateSvc(w, resp)
+		return
+	}
 	Success(w, resp)
 }
 
@@ -121,6 +125,20 @@ func Paginate(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
+}
+
+func PaginateSvc(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	var pgs PaginatorSvc
+	bt, _ := json.Marshal(data)
+	err := json.Unmarshal(bt, &pgs)
+	if err != nil {
+		Exception(w, err, 422)
+		return
+	}
+	pg := NewPaginate(pgs.Data, pgs.Total, pgs.Page, pgs.Size)
+	json.NewEncoder(w).Encode(pg)
 }
 
 /** local func */
@@ -135,4 +153,13 @@ func parseStruct(myvar interface{}) string {
 	} else {
 		return t.Name()
 	}
+}
+
+/** local struct */
+type PaginatorSvc struct {
+	Data      []interface{} `json:"data"`
+	Page      int           `json:"page"`
+	Size      int           `json:"size"`
+	Total     int           `json:"total"`
+	PageCount int           `json:"page_count"`
 }
