@@ -33,28 +33,45 @@ type ErrorData struct {
 	UserMessage      string `json:"user_message"`
 }
 
-type PaginateData struct {
+type PaginateDataSvc struct {
 	Data       interface{} `json:"data"`
 	Additional interface{} `json:"additional,omitempty"`
 	Paginate   struct {
-		Count     int `json:"total"`
-		Page      int `json:"page"`
-		Size      int `json:"size"`
-		PageCount int `json:"page_count"`
+		Total      int  `json:"total"`
+		Page       int  `json:"page"`
+		Size       int  `json:"size"`
+		TotalPages int  `json:"total_pages"`
+		NextPage   *int `json:"next_page"`
+		PrevPage   *int `json:"prev_page"`
 	} `json:"paginate"`
 	Code int `json:"code"`
 }
 
-func NewPaginate(data interface{}, count, page, size int) *PaginateData {
-	dp := PaginateData{
+func NewPaginateFromSvc(data interface{}, count, page, size int) *PaginateDataSvc {
+	var totalPages int = int(math.Ceil(float64(count) / float64(size)))
+	var nextPage, prevPage *int
+
+	if page > 1 {
+		np := page - 1
+		prevPage = &np
+	}
+	if page == totalPages {
+	} else {
+		np := page + 1
+		nextPage = &np
+	}
+
+	dp := PaginateDataSvc{
 		Data: data,
 		Paginate: struct {
-			Count     int `json:"total"`
-			Page      int `json:"page"`
-			Size      int `json:"size"`
-			PageCount int `json:"page_count"`
+			Total      int  `json:"total"`
+			Page       int  `json:"page"`
+			Size       int  `json:"size"`
+			TotalPages int  `json:"total_pages"`
+			NextPage   *int `json:"next_page"`
+			PrevPage   *int `json:"prev_page"`
 		}{
-			count, page, size, int(math.Ceil(float64(count) / float64(size))),
+			count, page, size, totalPages, nextPage, prevPage,
 		},
 		Code: 0,
 	}
@@ -137,7 +154,7 @@ func PaginateSvc(w http.ResponseWriter, data interface{}) {
 		Exception(w, err, 422)
 		return
 	}
-	pg := NewPaginate(pgs.Data, pgs.Total, pgs.Page, pgs.Size)
+	pg := NewPaginateFromSvc(pgs.Data, pgs.Total, pgs.Page, pgs.Size)
 	json.NewEncoder(w).Encode(pg)
 }
 
