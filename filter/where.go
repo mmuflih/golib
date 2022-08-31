@@ -31,13 +31,21 @@ func (w Where) generateFilter(field, op string, val interface{}) string {
 
 func (w Where) getValue(val interface{}) string {
 	v := reflect.ValueOf(val)
+	fmt.Println(v.Type().Name())
 	switch v.Type().Name() {
 	case "int":
 		return strconv.Itoa(val.(int))
+	case "float64":
+		return fmt.Sprintf("%f", val)
+	case "float32":
+		return fmt.Sprintf("%f", val)
+	case "bool":
+		return strconv.FormatBool(val.(bool))
 	case "string":
+		return "'" + val.(string) + "'"
+	default:
 		return val.(string)
 	}
-	return ""
 }
 
 func (w Where) GenerateConditionRaw() string {
