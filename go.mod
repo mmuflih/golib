@@ -8,4 +8,5 @@ require (
 	github.com/getsentry/sentry-go v0.9.0
 	github.com/gorilla/mux v1.8.0
 	github.com/mmuflih/go-text-log v1.0.0
+	gorm.io/gorm v1.23.8
 )
