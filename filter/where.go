@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -50,26 +51,45 @@ func (w Where) getValue(val interface{}) string {
 
 func (w Where) GenerateConditionRaw() string {
 	var where string
-	var id int
+	var i int
 	for field, val := range w {
-		for op, v := range val {
-			if id == 0 {
-				where += " where " + w.generateFilter(field, op, v)
-				break
+		if strings.ToLower(field) == "like" {
+			var wheres []string
+			for op, v := range val {
+				wheres = append(wheres, op+" like "+w.getValue(v))
 			}
-			where += "	and " + w.generateFilter(field, op, v)
+			if i == 0 {
+				where += " where (" + strings.Join(wheres, " or ") + ")"
+			}
+			where += " and (" + strings.Join(wheres, " or ") + ")"
+			i++
+			continue
 		}
-		id++
+		for op, v := range val {
+			where += w.genRawWhere(i, field, op, v)
+		}
+		i++
 	}
 	return where
 }
 
-func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
-	var id int
+func (w Where) genRawWhere(i int, field, op string, v interface{}) string {
+	if i == 0 {
+		return " where " + w.generateFilter(field, op, v)
+	}
+	return "	and " + w.generateFilter(field, op, v)
+}
 
+func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 	for field, val := range w {
+		if strings.ToLower(field) == "like" {
+			var wheres []string
+			for op, v := range val {
+				wheres = append(wheres, op+" like "+w.getValue(v))
+			}
+			db.Where(strings.Join(wheres, " or "))
+		}
 		for op, v := range val {
-			fmt.Println(field, op, v)
 			if op == "raw" {
 				db.Where(field + " " + w.getValue(v))
 				continue
@@ -83,7 +103,6 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 			}
 
 		}
-		id++
 	}
 	return db
 }
