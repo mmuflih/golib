@@ -65,6 +65,18 @@ func (w Where) GenerateConditionRaw() string {
 			i++
 			continue
 		}
+		if strings.ToLower(field) == "ilike" {
+			var wheres []string
+			for op, v := range val {
+				wheres = append(wheres, op+" ilike "+w.getValue(v))
+			}
+			if i == 0 {
+				where += " where (" + strings.Join(wheres, " or ") + ")"
+			}
+			where += " and (" + strings.Join(wheres, " or ") + ")"
+			i++
+			continue
+		}
 		for op, v := range val {
 			where += w.genRawWhere(i, field, op, v)
 		}
@@ -86,6 +98,13 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 			var wheres []string
 			for op, v := range val {
 				wheres = append(wheres, op+" like "+w.getValue(v))
+			}
+			db.Where(strings.Join(wheres, " or "))
+		}
+		if strings.ToLower(field) == "ilike" {
+			var wheres []string
+			for op, v := range val {
+				wheres = append(wheres, op+" ilike "+w.getValue(v))
 			}
 			db.Where(strings.Join(wheres, " or "))
 		}
