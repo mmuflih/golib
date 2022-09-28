@@ -102,6 +102,7 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 				wheres = append(wheres, op+" like "+w.getValue(v))
 			}
 			db.Where(strings.Join(wheres, " or "))
+			continue
 		}
 		if strings.ToLower(field) == "ilike" {
 			var wheres []string
@@ -109,6 +110,7 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 				wheres = append(wheres, op+" ilike "+w.getValue(v))
 			}
 			db.Where(strings.Join(wheres, " or "))
+			continue
 		}
 		for op, v := range val {
 			if op == "raw" {
