@@ -60,6 +60,7 @@ func (w Where) GenerateConditionRaw() string {
 			}
 			if i == 0 {
 				where += " where (" + strings.Join(wheres, " or ") + ")"
+				continue
 			}
 			where += " and (" + strings.Join(wheres, " or ") + ")"
 			i++
@@ -72,6 +73,7 @@ func (w Where) GenerateConditionRaw() string {
 			}
 			if i == 0 {
 				where += " where (" + strings.Join(wheres, " or ") + ")"
+				continue
 			}
 			where += " and (" + strings.Join(wheres, " or ") + ")"
 			i++
