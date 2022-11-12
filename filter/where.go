@@ -112,6 +112,10 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 			db.Where(strings.Join(wheres, " or "))
 			continue
 		}
+		if val == nil {
+			db.Where(field + " is null")
+			continue
+		}
 		for op, v := range val {
 			if op == "raw" {
 				db.Where(field + " " + w.getValue(v))
