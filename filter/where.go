@@ -17,6 +17,8 @@ import (
 
 type W map[string]interface{}
 
+type Between map[interface{}]interface{}
+
 type Where map[string]W
 
 func (w Where) generateFilter(field, op string, val interface{}) string {
@@ -32,7 +34,6 @@ func (w Where) generateFilter(field, op string, val interface{}) string {
 
 func (w Where) getValue(val interface{}) string {
 	v := reflect.ValueOf(val)
-	fmt.Println(v.Type().Name())
 	switch v.Type().Name() {
 	case "int":
 		return strconv.Itoa(val.(int))
@@ -60,6 +61,11 @@ func (w Where) getValue(val interface{}) string {
 		return strconv.FormatBool(val.(bool))
 	case "string":
 		return "'" + val.(string) + "'"
+	case "Between":
+		for k, vv := range val.(Between) {
+			return w.getValue(k) + " and " + w.getValue(vv)
+		}
+		return val.(string)
 	default:
 		return val.(string)
 	}
@@ -69,6 +75,11 @@ func (w Where) GenerateConditionRaw() string {
 	var where string
 	var i int
 	for field, val := range w {
+		if val == nil {
+			where += w.genRawWhere(i, field, " is null", nil)
+			i++
+			continue
+		}
 		if strings.ToLower(field) == "like" {
 			var wheres []string
 			for op, v := range val {
@@ -112,6 +123,10 @@ func (w Where) genRawWhere(i int, field, op string, v interface{}) string {
 
 func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 	for field, val := range w {
+		if val == nil {
+			db.Where(field + " is null")
+			continue
+		}
 		if strings.ToLower(field) == "like" {
 			var wheres []string
 			for op, v := range val {
@@ -126,10 +141,6 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 				wheres = append(wheres, op+" ilike "+w.getValue(v))
 			}
 			db.Where(strings.Join(wheres, " or "))
-			continue
-		}
-		if val == nil {
-			db.Where(field + " is null")
 			continue
 		}
 		for op, v := range val {
