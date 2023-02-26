@@ -104,7 +104,7 @@ func (w Where) GenerateConditionRaw() string {
 		if strings.ToLower(field) == "like" {
 			var whs []string
 			for op, v := range val {
-				whs = append(wheres, op+" like "+w.getValue(v))
+				whs = append(whs, op+" like "+w.getValue(v))
 			}
 			wheres = append(wheres, " ("+strings.Join(whs, " or ")+")")
 			continue
