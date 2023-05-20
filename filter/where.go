@@ -148,7 +148,7 @@ func (w Where) genRawWhere(i int, field, op string, v interface{}) string {
 func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 	for field, val := range w {
 		if val == nil {
-			db.Where(field + " is null")
+			db = db.Where(field + " is null")
 			continue
 		}
 		if strings.ToLower(field) == "like" {
@@ -156,7 +156,7 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 			for op, v := range val {
 				wheres = append(wheres, op+" like "+w.getValue(v))
 			}
-			db.Where(strings.Join(wheres, " or "))
+			db = db.Where(strings.Join(wheres, " or "))
 			continue
 		}
 		if strings.ToLower(field) == "ilike" {
@@ -164,26 +164,26 @@ func (w Where) GenerateCondition(db *gorm.DB) *gorm.DB {
 			for op, v := range val {
 				wheres = append(wheres, op+" ilike "+w.getValue(v))
 			}
-			db.Where(strings.Join(wheres, " or "))
+			db = db.Where(strings.Join(wheres, " or "))
 			continue
 		}
 		for op, v := range val {
 			if op == "raw" {
-				db.Where(field + " " + w.getValue(v))
+				db = db.Where(field + " " + w.getValue(v))
 				continue
 			}
 			if strings.ToLower(op) == "or" {
 				oOr, ok := v.(Or)
 				if ok {
-					db.Where(oOr.Extract(field))
+					db = db.Where(oOr.Extract(field))
 					continue
 				}
 			}
 			if v == nil {
-				db.Where(field + " is null")
+				db = db.Where(field + " is null")
 				continue
 			} else {
-				db.Where(field+" "+op+" ?", v)
+				db = db.Where(field+" "+op+" ?", v)
 				continue
 			}
 
