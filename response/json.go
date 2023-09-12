@@ -100,6 +100,31 @@ func Exception(w http.ResponseWriter, err error, code int) {
 	)
 }
 
+func ExceptionFormatted(w http.ResponseWriter, err error, validator map[string]string, code int) {
+	/** sentry */
+	go sendSentry(err)
+
+	pc, fn, line, _ := runtime.Caller(1)
+	log.Printf("[error] %s:%d %v on %s", fn, line, err, pc)
+	moreInfo, err := json.Marshal(validator)
+	if err != nil {
+		moreInfo = []byte{}
+	}
+	exception := ErrorData{
+		err.Error() + " on " + fn + ":" + strconv.Itoa(line),
+		code,
+		string(moreInfo),
+		code,
+		err.Error(),
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+
+	err = json.NewEncoder(w).Encode(
+		exception,
+	)
+}
+
 func Success(w http.ResponseWriter, data interface{}) {
 	exception := SuccessData{
 		data,
