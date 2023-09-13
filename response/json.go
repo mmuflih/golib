@@ -26,11 +26,11 @@ type SuccessData struct {
 }
 
 type ErrorData struct {
-	DeveloperMessage string `json:"developer_message"`
-	ErrorCode        int    `json:"error_code"`
-	MoreInfo         string `json:"more_info"`
-	Status           int    `json:"status"`
-	UserMessage      string `json:"user_message"`
+	DeveloperMessage string      `json:"developer_message"`
+	ErrorCode        int         `json:"error_code"`
+	MoreInfo         interface{} `json:"more_info"`
+	Status           int         `json:"status"`
+	UserMessage      string      `json:"user_message"`
 }
 
 type PaginateDataSvc struct {
@@ -100,22 +100,18 @@ func Exception(w http.ResponseWriter, err error, code int) {
 	)
 }
 
-func ExceptionFormatted(w http.ResponseWriter, err error, validator map[string]string, code int) {
+func ExceptionFormatted(w http.ResponseWriter, err error, moreI map[string]string, code int) {
 	/** sentry */
 	go sendSentry(err)
 
 	pc, fn, line, _ := runtime.Caller(1)
 	log.Printf("[error] %s:%d %v on %s", fn, line, err, pc)
-	moreInfo, err := json.Marshal(validator)
-	if err != nil {
-		moreInfo = []byte{}
-	}
 	exception := ErrorData{
 		err.Error() + " on " + fn + ":" + strconv.Itoa(line),
 		code,
-		string(moreInfo),
+		moreI,
 		code,
-		err.Error(),
+		"Invalid request data",
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
